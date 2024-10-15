@@ -1,15 +1,43 @@
 # BoardgameListingWebApp
 
 ## Description
+***********Authers*********:
+	Tarek EL Baz
+	Ahmed AbdelRahman
+	Ahmed Waleed
+	Ibrahim El Araby
+	Nahla Samy
 
 **Board Game Database Full-Stack Web Application.**
+
+This project deployed with VMware Workstation using 5 Virtual Machines each one of them with a certainrole as following:
+
+-master.depi.local
+	-k8s master
+	-Ansible Control Node
+	-Jenkins Master Node
+	-trivy   Code Checker
+-worker1.depi.local 
+	-k8s worker1 node
+	-blackbox exporter
+-worker2.depi.local
+        -k8s worker1 node
+        -blackbox exporter
+-nexus.depi.local
+	-Nexus repo for artifacts as a container
+	-sonarqube for image testing as a container
+-prometheus.depi.local
+	-prometheus for monitoring and alerting toolkit the nodes and the application
+	-grafana    for data visualization and monitoring platform
+
 This web application displays lists of board games and their reviews. While anyone can view the board game lists and reviews, they are required to log in to add/ edit the board games and their reviews. The 'users' have the authority to add board games to the list and add reviews, and the 'managers' have the authority to edit/ delete the reviews on top of the authorities of users.  
 
 ## Technologies
 
+- on-premises VMware environment
+- Amazon Web Services (EC2)
 - Java
 - Spring Boot
-- Amazon Web Services(AWS) EC2
 - Thymeleaf
 - Thymeleaf Fragments
 - HTML5
