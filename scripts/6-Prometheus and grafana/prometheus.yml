@@ -1,0 +1,35 @@
+global:
+  scrape_interval: 15s  # How often to scrape targets by default.
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['prometheus.depi.local:9090']  # This is Prometheus itself.
+
+  - job_name: 'app-servers'
+    static_configs:
+      - targets: 
+          - '192.168.10.150:9100'  # jenkins.
+          - '192.168.10.153:9100' # Nexus
+          - '192.168.10.154:9100' # Grafana
+
+  - job_name: 'Jenkins'
+    metrics_path: '/prometheus'
+    static_configs:
+      - targets: ['192.168.10.150:8080']
+
+  - job_name: 'blackbox'
+    metrics_path: /probe
+    params:
+      module: [http_2xx] # Look for a HTTP 200 response.
+    static_configs:
+      - targets:
+          - http://prometheus.io # Target to probe with http
+          - http://192.168.10.150:32062/ # Target to probe with http on port 31508 our application.
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: 192.168.10.151:9115 # The blackbox exporter's real hostname:127.0.0.1:

@@ -1,0 +1,26 @@
+all:
+  children:
+    k8s_cluster:
+      children:
+        k8s_master:
+          hosts:
+            master:
+              ansible_host: 
+        k8s_workers:
+          hosts:
+            worker1:
+              ansible_host: 
+            worker2:
+              ansible_host: 
+    sonarqube:
+      hosts:
+        sonarqube:
+          ansible_host: 
+    nexus:
+      hosts:
+        nexus:
+          ansible_host: 
+    jenkins:
+      hosts:
+        jenkins:
+          ansible_host: 

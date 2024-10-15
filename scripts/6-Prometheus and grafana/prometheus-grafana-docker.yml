@@ -1,0 +1,62 @@
+---
+- name: Install Docker and Deploy Prometheus and Grafana
+  hosts: monitor
+  become: yes
+  tasks:
+    - name: Install prerequisites
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+        update_cache: yes
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: present
+        update_cache: yes
+
+    - name: Install Docker Compose
+      get_url:
+        url: https://github.com/docker/compose/releases/download/1.29.2/docker-compose-`uname -s`-`uname -m`
+        dest: /usr/local/bin/docker-compose
+        mode: 'a+x'
+
+    - name: Verify Docker is installed
+      command: docker --version
+
+    - name: Verify Docker Compose is installed
+      command: docker-compose --version
+
+    - name: Create application directory
+      file:
+        path: /opt/prometheus-grafana
+        state: directory
+
+    - name: Copy docker-compose.yml
+      copy:
+        src: ./docker-compose.yml
+        dest: /opt/prometheus-grafana/docker-compose.yml
+
+    - name: Copy prometheus.yml
+      copy:
+        src: ./prometheus.yml
+        dest: /opt/prometheus-grafana/prometheus.yml
+
+    - name: Start Prometheus and Grafana containers
+      shell: docker-compose up -d
+      args:
+        chdir: /opt/prometheus-grafana

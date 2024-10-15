@@ -1,0 +1,57 @@
+- name: gather host facts
+  setup: gather_subset=all
+
+- name: set system timezone
+  timezone: name=Etc/UTC
+
+- name: install common packages
+  apt:
+    name:
+      - build-essential
+      - git
+      - screen
+      - htop
+      - iotop
+      - iftop
+      - mosh
+      - unzip
+      - ca-certificates
+      - makepasswd
+    state: present
+    update_cache: yes
+
+- name: generate random password
+  shell: makepasswd --chars 32
+  register: output
+
+- set_fact: password={{ output.stdout }}
+
+- name: create devops-user user
+  user: name=devops-user groups=sudo append=yes password={{ password }} shell=/bin/bash
+
+- name: allow dev user to sudo without password
+  copy: content="devops-user ALL=(ALL) NOPASSWD:ALL" dest=/etc/sudoers.d/dev mode=0440
+
+- name: create ssh configuration directory
+  file: path=/home/devops-user/.ssh state=directory owner=dev group=dev mode=0700
+
+- name: Copy authorized_keys from root to dev
+  copy:
+    src: /root/.ssh/authorized_keys
+    dest: /home/dev/.ssh/authorized_keys
+    owner: devops-user
+    group: devops-user
+    mode: '0600'
+    remote_src: yes
+
+- name: disallow login with root
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^PermitRootLogin" line="PermitRootLogin no" state=present
+
+- name: disallow login with password
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^PasswordAuthentication" line="PasswordAuthentication no" state=present
+
+- name: restart ssh
+  systemd: name=ssh state=restarted
+
+- name: set hostname
+  hostname: name={{ inventory_hostname }}

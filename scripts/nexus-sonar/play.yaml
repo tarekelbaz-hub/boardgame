@@ -1,0 +1,7 @@
+---
+- name: Install SonarQube and Nexus Repository
+  hosts: servers
+  become: true
+  roles:
+    - nexus
+    - sonar

@@ -1,0 +1,34 @@
+- name: Check if swap is already enabled
+  command: swapon --show
+  register: swap_enabled
+  ignore_errors: yes
+
+- name: Create a swap file if swap is not enabled
+  command: fallocate -l 2G /swapfile
+  when: swap_enabled.stdout == ""
+
+- name: Set the correct permissions for the swap file
+  file:
+    path: /swapfile
+    mode: '0600'
+    owner: root
+    group: root
+  when: swap_enabled.stdout == ""
+
+- name: Make the file a swap space
+  command: mkswap /swapfile
+  when: swap_enabled.stdout == ""
+
+- name: Enable the swap file
+  command: swapon /swapfile
+  when: swap_enabled.stdout == ""
+
+- name: Make the swap permanent in fstab
+  lineinfile:
+    path: /etc/fstab
+    line: '/swapfile none swap sw 0 0'
+    create: yes
+  when: swap_enabled.stdout == ""
+
+- name: Verify swap is enabled
+  command: swapon --show

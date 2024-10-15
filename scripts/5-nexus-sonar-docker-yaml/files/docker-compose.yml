@@ -1,0 +1,23 @@
+version: '3'
+services:
+  nexus:
+    image: sonatype/nexus3:latest
+    ports:
+      - "8081:8081"
+    volumes:
+      - nexus-data:/nexus-data
+
+  sonar:
+    image: sonarqube:lts-community
+    ports:
+      - "9000:9000"
+    volumes:
+      - sonar-data:/opt/sonarqube/data
+      - sonar-extensions:/opt/sonarqube/extensions
+      - sonar-logs:/opt/sonarqube/logs
+
+volumes:
+  nexus-data:
+  sonar-data:
+  sonar-extensions:
+  sonar-logs:

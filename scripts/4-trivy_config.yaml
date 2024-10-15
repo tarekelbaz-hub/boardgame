@@ -1,0 +1,30 @@
+- name: Configuring trivy nodes
+  hosts: masters
+  become: true
+  tasks:
+    - name: Installing required packages for trivy
+      ansible.builtin.apt:
+        name:
+          - wget
+          - apt-transport-https
+          - gnupg
+          - lsb-release
+        state: present
+        update_cache: true
+
+    - name: Install GPG key for trivy
+      ansible.builtin.shell: >
+        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+      args:
+        creates: /usr/share/keyrings/trivy.gpg  # Correct path for the key file
+
+    - name: Add trivy APT repository
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb {{ ansible_distribution_release }} main"
+        state: present
+
+    - name: Installing trivy
+      ansible.builtin.apt:
+        name: trivy
+        state: present
+        update_cache: true

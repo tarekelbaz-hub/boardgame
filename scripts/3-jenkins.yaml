@@ -1,0 +1,33 @@
+---
+- hosts: masters
+  become: true
+  become_method: sudo
+  tasks:
+    - name: Installing required packages for Jenkins
+      ansible.builtin.apt:
+        name: openjdk-17-jre-headless
+        state: present
+        update_cache: true
+
+    - name: Install GPG key for Jenkins
+      ansible.builtin.shell: >
+        wget -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+      args:
+        creates: /usr/share/keyrings/jenkins-keyring.asc  # Ensure correct path for the key file
+
+    - name: Add Jenkins APT repository
+      ansible.builtin.apt_repository:
+        repo: 'deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/'
+        state: present
+
+    - name: Installing Jenkins
+      ansible.builtin.apt:
+        name: jenkins
+        state: present
+        update_cache: true
+
+    - name: Starting services
+      ansible.builtin.service:
+        name: jenkins
+        state: started
+        enabled: true   

@@ -1,0 +1,74 @@
+- name: Install required packages
+  apt:
+    name:
+      - curl
+      - gnupg2
+      - software-properties-common
+      - apt-transport-https
+      - ca-certificates
+      - tar
+    state: present
+    update_cache: yes
+  become: true
+
+- name: Download Docker GPG key
+  get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /tmp/docker.gpg
+    mode: '0644'
+  become: true
+
+- name: De-armour Docker GPG key and move to trusted.gpg.d
+  command: gpg --yes --dearmour -o /etc/apt/trusted.gpg.d/docker.gpg /tmp/docker.gpg
+  become: true
+
+- name: Add Docker APT repository
+  apt_repository:
+    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable"
+    state: present
+  become: true
+
+- name: Update APT package index
+  apt:
+    update_cache: yes
+  become: true
+
+- name: Install containerd.io package
+  apt:
+    name: containerd.io
+    state: present
+  become: true
+
+- name: Generate default containerd config and save to /etc/containerd/config.toml
+  command: containerd config default
+  register: containerd_config
+  changed_when: false
+  become: true
+
+- name: Write containerd config to /etc/containerd/config.toml
+  copy:
+    content: "{{ containerd_config.stdout }}"
+    dest: /etc/containerd/config.toml
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+
+- name: Update SystemdCgroup setting in /etc/containerd/config.toml
+  replace:
+    path: /etc/containerd/config.toml
+    regexp: 'SystemdCgroup = false'
+    replace: 'SystemdCgroup = true'
+  become: true
+
+- name: Restart containerd service
+  systemd:
+    name: containerd
+    state: restarted
+  become: true
+
+- name: Enable containerd service to start on boot
+  systemd:
+    name: containerd
+    enabled: yes
+  become: true

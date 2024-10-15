@@ -1,0 +1,47 @@
+---
+- name: Install Prerequisites
+  apt:
+    name:
+      - openjdk-11-jdk
+      - unzip
+    state: present
+
+- name: Create a sonar user
+  user:
+    name: sonar
+    shell: /bin/bash
+
+- name: Download SonarQube
+  get_url:
+    url: https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-9.9.0.65466.zip
+    dest: /opt/sonarqube.zip
+
+- name: Extract SonarQube
+  unarchive:
+    src: /opt/sonarqube.zip
+    dest: /opt/
+    remote_src: yes
+
+- name: Create a symbolic link for SonarQube
+  file:
+    src: /opt/sonarqube-9.9.0.65466
+    dest: /opt/sonarqube
+    state: link
+
+- name: Change ownership of SonarQube directory
+  file:
+    path: /opt/sonarqube
+    owner: sonar
+    group: sonar
+    recurse: yes
+
+- name: Configure SonarQube as a service
+  template:
+    src: sonar.service.j2
+    dest: /etc/systemd/system/sonar.service
+
+- name: Start and enable SonarQube service
+  systemd:
+    name: sonar
+    enabled: yes
+    state: started

@@ -1,0 +1,45 @@
+---
+- name: Install Java
+  apt:
+    name: openjdk-11-jdk
+    state: present
+
+- name: Create a nexus user
+  user:
+    name: nexus
+    shell: /bin/bash
+
+- name: Download Nexus Repository Manager
+  get_url:
+    url: https://download.sonatype.com/nexus/3/latest-unix.tar.gz
+    dest: /opt/nexus.tar.gz
+
+- name: Extract Nexus
+  unarchive:
+    src: /opt/nexus.tar.gz
+    dest: /opt/
+    remote_src: yes
+
+- name: Create a symbolic link for nexus
+  file:
+    src: /opt/nexus-3.*
+    dest: /opt/nexus
+    state: link
+
+- name: Change ownership of nexus directory
+  file:
+    path: /opt/nexus
+    owner: nexus
+    group: nexus
+    recurse: yes
+
+- name: Configure Nexus as a service
+  template:
+    src: nexus.service.j2
+    dest: /etc/systemd/system/nexus.service
+
+- name: Start and enable Nexus service
+  systemd:
+    name: nexus
+    enabled: yes
+    state: started

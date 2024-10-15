@@ -1,0 +1,17 @@
+######## IP Addresses and hostnames ########
+192.168.10.150  master.depi.local   master
+192.168.10.151  worker1.depi.local  worker1
+192.168.10.152  worker2.depi.local  worker2
+192.168.10.153  nexus.depi.local    nexus
+192.168.10.154  prometheus.depi.local prometheus
+
+
+###### Ports Used #####
+jenkins: 8080
+prometheus: 9090
+grafana: 3000
+
+
+
+############ Accounts ###############
+devops-user	P@ssw0rd

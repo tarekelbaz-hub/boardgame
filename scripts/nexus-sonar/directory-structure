@@ -1,0 +1,14 @@
+ansible-sonar-nexus/
+├── hosts
+├── playbook.yml
+└── roles
+    ├── nexus
+    │   ├── tasks
+    │   │   └── main.yml
+    │   └── templates
+    │       └── nexus.service.j2
+    └── sonar
+        ├── tasks
+        │   └── main.yml
+        └── templates
+            └── sonar.service.j2
