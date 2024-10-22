@@ -1,0 +1,60 @@
+---
+- name: Install Node Exporter
+  hosts: all
+  become: true
+  become_method: sudo
+  tasks:
+    - name: Download Node Exporter
+      get_url:
+        url: "https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-amd64.tar.gz"
+        dest: /tmp/node_exporter.tar.gz
+
+    - name: Extract Node Exporter
+      unarchive:
+        src: /tmp/node_exporter.tar.gz
+        dest: /usr/local/bin/
+        remote_src: yes
+
+    - name: Move Node Exporter binary
+      command: mv /usr/local/bin/node_exporter-1.8.2.linux-amd64/node_exporter /usr/local/bin/node_exporter
+      args:
+        removes: /usr/local/bin/node_exporter
+
+    - name: Create node_exporter user
+      user:
+        name: node_exporter
+        shell: /bin/false
+        system: yes
+
+    - name: Create systemd service file for Node Exporter
+      copy:
+        dest: /etc/systemd/system/node_exporter.service
+        content: |
+          [Unit]
+          Description=Prometheus Node Exporter
+          Wants=network-online.target
+          After=network-online.target
+
+          [Service]
+          User=node_exporter
+          Group=node_exporter
+          Type=simple
+          ExecStart=/usr/local/bin/node_exporter-1.8.2.linux-amd64/node_exporter
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Reload systemd
+      command: systemctl daemon-reload
+
+    - name: Start Node Exporter service
+      systemd:
+        name: node_exporter
+        state: started
+        enabled: true
+
+          #- name: Allow Node Exporter port in the firewall
+      #ufw:
+        #rule: allow
+          #name: 'Node Exporter'
+          #        port: 9100
