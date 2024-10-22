@@ -17,7 +17,7 @@ This web application displays lists of board games and their reviews. While anyo
 
 ## Description
 
-This application is deployed using the DevOps Tools to create fast delivary, agile enviroment and collaboration Enviroment either on the On-premises sVMware Infrastructure or Over the cloud Infrastructure (AWS).
+This application is deployed using the DevOps Tools to create fast delivary, agile enviroment and collaboration Enviroment either on the On-premises VMware Infrastructure or Over the cloud Infrastructure (AWS).
 
 We have Used Five Virtual Machines On-Premises and Another Edition on AWS Instances with a specific role:
 
